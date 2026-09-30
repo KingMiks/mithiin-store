@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Mithiin | Shop{% endblock %}
+
+{% block content %}
+<section class="grid">
+  {% for item in inventory %}
+    <a class="card" href="{{ url_for('product_detail', product_id=item.id) }}">
+      <img src="{{ item.image }}" alt="{{ item.name }}" />
+      <h2>{{ item.name }}</h2>
+      <p class="price">${{ "{:,}".format(item.price) }}</p>
+      {% if item.stock > 0 %}
+        <p class="stock">{{ item.stock }} in stock</p>
+      {% else %}
+        <p class="stock sold-out">Sold out</p>
+      {% endif %}
+    </a>
+  {% endfor %}
+</section>
+{% endblock %}

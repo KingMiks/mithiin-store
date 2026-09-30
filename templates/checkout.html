@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Checkout | Mithiin{% endblock %}
+
+{% block content %}
+<section class="checkout">
+  <h1>Checkout</h1>
+  <p>{{ product.name }} — ${{ "{:,}".format(product.price) }}</p>
+
+  <div class="checkout-stub">
+    <p><strong>Payment isn't wired up yet.</strong></p>
+    <p>This is where Stripe Connect checkout will go — the customer pays
+    once, and the payment splits automatically between us and the
+    gemstore based on the agreed percentage.</p>
+  </div>
+</section>
+{% endblock %}
