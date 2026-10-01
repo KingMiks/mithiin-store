@@ -9,58 +9,37 @@ TODO markers show exactly where real integration will plug in later.
 """
 
 import os
-from flask import Flask, render_template, abort
+from functools import wraps
+
 from dotenv import load_dotenv
+from flask import Flask, abort, redirect, render_template, request, session, url_for
+
+from models import Product, db
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
-
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///inventory.db"
+db.init_app(app)
+with app.app_context():
+    db.create_all()
 
 # TODO: replace with a real call to the gemstore API once we have the docs/key.
 # For now this is fake data so we can build and test the site's layout and flow.
-MOCK_INVENTORY = [
-    {
-        "id": 1,
-        "name": "Round Brilliant, 1.20ct",
-        "cut": "Round Brilliant",
-        "carat": 1.20,
-        "price": 4200,
-        "stock": 3,
-        "image": "https://via.placeholder.com/500x500.png?text=Diamond+1",
-    },
-    {
-        "id": 2,
-        "name": "Princess Cut, 0.90ct",
-        "cut": "Princess",
-        "carat": 0.90,
-        "price": 2850,
-        "stock": 1,
-        "image": "https://via.placeholder.com/500x500.png?text=Diamond+2",
-    },
-    {
-        "id": 3,
-        "name": "Emerald Cut, 1.50ct",
-        "cut": "Emerald",
-        "carat": 1.50,
-        "price": 5600,
-        "stock": 0,
-        "image": "https://via.placeholder.com/500x500.png?text=Diamond+3",
-    },
-]
-
+# requests = url(API_KEY)
 
 def get_inventory():
     """TODO: swap this out for a real gemstore API call, e.g.:
     response = requests.get(GEMSTORE_API_URL + "/inventory", headers={"Authorization": f"Bearer {API_KEY}"})
     return response.json()
     """
-    return MOCK_INVENTORY
+    return Product.query.all()
 
 
 def get_product(product_id):
     """TODO: swap for a real single-item API call once available."""
-    return next((item for item in MOCK_INVENTORY if item["id"] == product_id), None)
+    return Product.query.get(product_id)
 
 
 @app.route("/")
@@ -86,6 +65,67 @@ def checkout(product_id):
     # This is where the payment split between us and the gemstore gets set up.
     return render_template("checkout.html", product=product)
 
+@app.route("/admin/login", methods = ["GET", "POST"])
+def login():
+    if request.method == "POST" and ADMIN_PASSWORD and request.form.get("password") == ADMIN_PASSWORD:
+        session["is_admin"] = True
+        return redirect(url_for("admin_dashboard"))
+    return render_template("admin/login.html")
+
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if session.get("is_admin", False):
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for("login"))
+    return wrapper
+
+@app.route("/admin")
+@admin_required
+def admin_dashboard():
+    inventory = get_inventory()
+    return render_template("admin/dashboard.html", inventory=inventory)
+
+@app.route("/admin/add", methods = ["GET", "POST"])
+@admin_required
+def admin_add():
+    if request.method == "POST":
+        new_product = Product(name=request.form.get("name"), cut=request.form.get("cut"), carat= float(request.form.get("carat")),
+                          price= int(request.form.get("price")), stock= int(request.form.get("stock")), image=request.form.get("image"))
+        db.session.add(new_product)
+        db.session.commit()
+        return redirect(url_for("admin_dashboard"))
+    return render_template("admin/form.html")
+
+@app.route("/admin/edit/<int:product_id>", methods = ["GET", "POST"])
+@admin_required
+def admin_edit(product_id):
+    product = Product.query.get(product_id)
+    if request.method == "POST":
+        product.name = request.form.get("name")
+        product.cut = request.form.get("cut")
+        product.carat = float(request.form.get("carat"))
+        product.price = int(request.form.get("price"))
+        product.stock = int(request.form.get("stock"))
+        product.image = request.form.get("image")
+        db.session.commit()
+        return redirect(url_for("admin_dashboard"))
+    return render_template("admin/form.html", product=product)
+
+@app.route("/admin/logout", methods = ["GET"])
+@admin_required
+def admin_logout():
+        session.clear()
+        return redirect(url_for("login"))
+
+@app.route("/admin/delete/<int:product_id>", methods = ["POST"])
+@admin_required
+def admin_delete(product_id):
+    product = Product.query.get(product_id)
+    db.session.delete(product)
+    db.session.commit()
+    return redirect(url_for("admin_dashboard"))
 
 if __name__ == "__main__":
     app.run(debug=True)
