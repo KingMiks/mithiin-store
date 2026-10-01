@@ -12,7 +12,16 @@ import os
 from functools import wraps
 
 from dotenv import load_dotenv
-from flask import Flask, abort, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    abort,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 from models import Product, db
 
@@ -70,7 +79,11 @@ def login():
     if request.method == "POST" and ADMIN_PASSWORD and request.form.get("password") == ADMIN_PASSWORD:
         session["is_admin"] = True
         return redirect(url_for("admin_dashboard"))
-    return render_template("admin/login.html")
+    elif request.method == "POST" and ADMIN_PASSWORD and request.form.get("password") != ADMIN_PASSWORD:
+        flash("Incorrect password.")
+        return redirect(url_for("login"))
+    else:
+        return render_template("admin/login.html")
 
 def admin_required(f):
     @wraps(f)
