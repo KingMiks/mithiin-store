@@ -11,3 +11,4 @@ class Product(db.Model):
     price = db.Column(db.Integer())
     stock = db.Column(db.Integer())
     image = db.Column(db.String(200))
+    status = db.Column(db.String(200), default="coming_soon")
