@@ -11,6 +11,7 @@ TODO markers show exactly where real integration will plug in later.
 import os
 from functools import wraps
 
+import stripe
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -28,6 +29,7 @@ from models import Product, db
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///inventory.db"
 db.init_app(app)
@@ -73,9 +75,22 @@ def checkout(product_id):
     product = get_product(product_id)
     if product is None or product.status != "active":
         abort(404)
-    # TODO: replace this stub with real Stripe Connect checkout session creation.
-    # This is where the payment split between us and the gemstore gets set up.
-    return render_template("checkout.html", product=product)
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {"name": product.name},
+                "unit_amount": product.price * 100, 
+            },
+            "quantity": 1,
+        }],
+        mode="payment",
+        success_url=url_for("checkout_success", _external=True),
+        cancel_url=url_for("checkout", product_id=product_id, _external=True),
+    )
+    return redirect(session.url, code=303)
 
 @app.route("/admin/login", methods = ["GET", "POST"])
 def login():
@@ -143,6 +158,11 @@ def admin_delete(product_id):
     db.session.delete(product)
     db.session.commit()
     return redirect(url_for("admin_dashboard"))
+
+@app.route("/checkout/success")
+def checkout_success():
+    return render_template("checkout_success.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
