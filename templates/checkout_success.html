@@ -1,12 +1,11 @@
-{% extends "base.html" %}
-{% block title %}Checkout Success{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Checkout Success{% endblock %} {%
+block content %}
 <section class="checkout">
   <h1>Success!</h1>
   <div class="checkout-message">
     <p><strong>Checkout Successful.</strong></p>
     <p>Thank you for your purchase!</p>
+    <p>Return to <a href="{{ url_for('home')}}">Homepage</a></p>
   </div>
 </section>
 {% endblock %}

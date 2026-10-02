@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Checkout Failed{% endblock %}
+
+{% block content %}
+<section class="checkout">
+  <h1>Oh no, something went wrong.</h1>
+  <div class="checkout-message">
+    <p><strong>Checkout Failed, please return to the homepage.</strong></p>
+    <a href="{{ url_for('home')}}">Homepage</a>
+  </div>
+</section>
+{% endblock %}

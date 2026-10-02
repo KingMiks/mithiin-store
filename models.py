@@ -12,3 +12,11 @@ class Product(db.Model):
     stock = db.Column(db.Integer())
     image = db.Column(db.String(200))
     status = db.Column(db.String(200), default="coming_soon")
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("product.id"))
+    quantity = db.Column(db.Integer())
+    price_paid = db.Column(db.Integer())
+    time = db.Column(db.DateTime())
+

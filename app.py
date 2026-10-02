@@ -9,6 +9,7 @@ TODO markers show exactly where real integration will plug in later.
 """
 
 import os
+from datetime import datetime
 from functools import wraps
 
 import stripe
@@ -24,7 +25,7 @@ from flask import (
     url_for,
 )
 
-from models import Product, db
+from models import Order, Product, db
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
@@ -87,7 +88,8 @@ def checkout(product_id):
             "quantity": 1,
         }],
         mode="payment",
-        success_url=url_for("checkout_success", _external=True),
+        metadata={"product_id": product.id},
+        success_url=url_for("checkout_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=url_for("checkout", product_id=product_id, _external=True),
     )
     return redirect(session.url, code=303)
@@ -161,7 +163,22 @@ def admin_delete(product_id):
 
 @app.route("/checkout/success")
 def checkout_success():
-    return render_template("checkout_success.html")
+    session_id = request.args.get("session_id")
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+    except stripe.error.InvalidRequestError:
+        return render_template("checkout_failed.html")
+    if session.payment_status == "paid":
+        product_id = int(session.metadata.get('product_id'))
+        product = Product.query.get(product_id)
+        new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now())
+        product.stock -= new_order.quantity
+        db.session.add(new_order)
+        db.session.commit()
+        return render_template("checkout_success.html")
+    else:
+        return render_template("checkout_failed.html")
+    
 
 
 if __name__ == "__main__":
