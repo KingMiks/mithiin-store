@@ -1,21 +1,28 @@
-{% extends "base.html" %}
-{% block title %}{{ product.name }} | Mithiin{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}{{ product.name }} | Mithiin{%
+endblock %} {% block content %}
 <section class="product-detail">
-  <img src="{{ product.image }}" alt="{{ product.name }}" />
+  <div class="image-wrap">
+    <img src="{{ product.image }}" alt="{{ product.name }}" />
+    {% if product.stock == 0 %}
+    <span class="sold-out-badge">SOLD OUT</span>
+    {% endif %}
+  </div>
   <div class="product-info">
     <h1>{{ product.name }}</h1>
     <p>Cut: {{ product.cut }}</p>
     <p>Carat: {{ product.carat }}</p>
     <p class="price">${{ "{:,}".format(product.price) }}</p>
-
     {% if product.stock > 0 %}
-      <p class="stock">{{ product.stock }} in stock</p>
-      <a class="buy-button" href="{{ url_for('checkout', product_id=product.id) }}">Buy now</a>
+    <p class="stock">{{ product.stock }} in stock</p>
+    <a
+      class="buy-button"
+      href="{{ url_for('checkout', product_id=product.id) }}"
+      >Buy now</a
+    >
     {% else %}
-      <p class="stock sold-out">Sold out</p>
+    <p class="stock sold-out">SOLD OUT</p>
     {% endif %}
+    <p>Return to <a href="{{ url_for('home')}}">Homepage</a></p>
   </div>
 </section>
 {% endblock %}

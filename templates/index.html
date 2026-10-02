@@ -12,13 +12,18 @@
     </a>
       {% elif item.status == "active"%}
       <a class="card" href="{{ url_for('product_detail', product_id=item.id) }}">
+      <div class="image-wrap">
       <img src="{{ item.image }}" alt="{{ item.name }}" />
+      {% if item.stock == 0 %}
+      <span class="sold-out-badge">SOLD OUT</span>
+      {% endif %}
+      </div>
       <h2>{{ item.name }}</h2>
       <p class="price">${{ "{:,}".format(item.price) }}</p>
       {% if item.stock > 0 %}
         <p class="stock">{{ item.stock }} in stock</p>
       {% else %}
-        <p class="stock sold-out">Sold out</p>
+        <p class="stock sold-out">SOLD OUT</p>
       {% endif %}
     </a>
     {% endif %}

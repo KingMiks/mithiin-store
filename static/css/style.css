@@ -44,11 +44,15 @@ main {
 
 .card img { width: 100%; border-radius: 4px; margin-bottom: 12px; }
 
+.image-wrap {position: relative}
+
 .price { font-weight: 600; margin-top: 4px; }
 
 .stock { font-size: 0.85rem; opacity: 0.7; }
 
 .stock.sold-out { color: #d66; opacity: 1; }
+
+.sold-out-badge {position: absolute; transform: translate(-50%, -50%); top: 50%; left: 50%; color: #d66; opacity: 1; font-weight: bold; font-size: 2rem;}
 
 .product-detail {
   display: flex;
