@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} | Mithiin{% endblock %}
+
+{% block content %}
+<section class="product-detail">
+  <img src="{{ product.image }}" alt="{{ product.name }}" />
+  <div class="product-info">
+    <h1>{{ product.name }}</h1>
+    <p>Cut: {{ product.cut }}</p>
+    <p>Carat: {{ product.carat }}</p>
+    <p>This product is coming soon!</p>
+    <p>Return to <a href="{{ url_for('home')}}">Homepage</a></p>
+  </div>
+</section>
+{% endblock %}

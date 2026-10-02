@@ -4,7 +4,14 @@
 {% block content %}
 <section class="grid">
   {% for item in inventory %}
+    {% if item.status == "coming_soon" %}
     <a class="card" href="{{ url_for('product_detail', product_id=item.id) }}">
+      <img src="{{ item.image }}" alt="{{ item.name }}" />
+      <h2>{{ item.name }}</h2>
+      <p class="coming-soon">Coming Soon</p>
+    </a>
+      {% elif item.status == "active"%}
+      <a class="card" href="{{ url_for('product_detail', product_id=item.id) }}">
       <img src="{{ item.image }}" alt="{{ item.name }}" />
       <h2>{{ item.name }}</h2>
       <p class="price">${{ "{:,}".format(item.price) }}</p>
@@ -14,6 +21,7 @@
         <p class="stock sold-out">Sold out</p>
       {% endif %}
     </a>
+    {% endif %}
   {% endfor %}
 </section>
 {% endblock %}

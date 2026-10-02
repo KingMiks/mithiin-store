@@ -49,7 +49,7 @@ def get_inventory():
     return Product.query.all()
 
 def get_public_inventory():
-    return [product for product in get_inventory() if product.status == "active"]
+    return [product for product in get_inventory() if product.status in ["active", "coming_soon"]]
 
 
 def get_product(product_id):
@@ -66,9 +66,12 @@ def home():
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
     product = get_product(product_id)
-    if product is None or product.status != "active":
+    if product is None or product.status == "hidden":
         abort(404)
-    return render_template("product.html", product=product)
+    elif product.status == "coming_soon":
+        return render_template("coming_soon.html", product=product)
+    else:
+        return render_template("product.html", product=product)
 
 
 @app.route("/checkout/<int:product_id>")
