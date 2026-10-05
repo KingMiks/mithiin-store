@@ -25,7 +25,9 @@ from flask import (
     url_for,
 )
 
-from models import Order, Product, db
+from models import User,Order, Product, db
+
+from werkzeug.security import generate_password_hash
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
@@ -181,6 +183,32 @@ def checkout_success():
         return render_template("checkout_success.html")
     else:
         return render_template("checkout_failed.html")
+
+@app.route("/register", methods =["GET", "POST"])
+def register():
+    # 1. if the form was submitted (POST):
+    if request.method == "POST":
+    #    2. read email and password from the form
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+        password = request.form.get("password")
+#    3. does a user with this email already exist? if so, flash a message and stop
+        if user is not None:
+            flash("Email already registered")
+            return redirect(url_for('register'))
+        else:
+    #    4. hash the password
+            password_hash = generate_password_hash(password)
+    #    5. create a User with the email and the hash, add it, commit
+            new_user = User(email=email, password_hash=password_hash)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for("home"))
+#    6. redirect to the login page
+# otherwise (GET): show the form
+    else:
+        return render_template("user/register.html")
+
     
 
 

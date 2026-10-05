@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Register Your Account{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <p>{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+<form method="post">
+    <input name="email" type="email">
+    <input name="password" type="password">
+    <button type="submit">Register</button>
+</form>
+<p>Return to <a href="{{ url_for('home')}}">Homepage</a></p>
+{% endblock %}
