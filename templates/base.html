@@ -9,6 +9,14 @@
   <body>
     <header class="site-header">
       <a href="{{ url_for('home') }}" class="brand">MITHIIN</a>
+      <nav>
+        {% if session.get("user_id") %}
+        <a href="{{ url_for('user_logout') }}">Logout</a>
+        {% else %}
+        <p> Existing User? <a href="{{ url_for('user_login') }}">Login</a></p>
+        <p> New user? <a href="{{ url_for('register') }}">Register Here</a></p>
+        {% endif %}
+      </nav>
     </header>
 
     <main>

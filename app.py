@@ -24,10 +24,10 @@ from flask import (
     session,
     url_for,
 )
+from flask_migrate import Migrate
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import User,Order, Product, db
-
-from werkzeug.security import generate_password_hash
+from models import Order, Product, User, db
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
@@ -36,8 +36,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///inventory.db"
 db.init_app(app)
-with app.app_context():
-    db.create_all()
+Migrate(app, db)
 
 # TODO: replace with a real call to the gemstore API once we have the docs/key.
 # For now this is fake data so we can build and test the site's layout and flow.
@@ -186,29 +185,57 @@ def checkout_success():
 
 @app.route("/register", methods =["GET", "POST"])
 def register():
-    # 1. if the form was submitted (POST):
     if request.method == "POST":
-    #    2. read email and password from the form
         email = request.form.get("email")
         user = User.query.filter_by(email=email).first()
         password = request.form.get("password")
-#    3. does a user with this email already exist? if so, flash a message and stop
         if user is not None:
             flash("Email already registered")
             return redirect(url_for('register'))
         else:
-    #    4. hash the password
             password_hash = generate_password_hash(password)
-    #    5. create a User with the email and the hash, add it, commit
             new_user = User(email=email, password_hash=password_hash)
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for("home"))
-#    6. redirect to the login page
-# otherwise (GET): show the form
     else:
         return render_template("user/register.html")
 
+@app.route("/user/login", methods=["GET", "POST"])
+def user_login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            flash("Invalid email or password")
+            return redirect(url_for('user_login'))
+        else:
+            typed_password = request.form.get("password")
+            stored_hash = user.password_hash
+            check_password = check_password_hash(stored_hash, typed_password)
+            if not check_password:
+                flash("Invalid email or password")
+                return redirect(url_for('user_login'))
+            else:
+                session["user_id"] = user.id
+                return redirect(url_for('home'))
+    else:
+        return render_template("user/login.html")
+
+def user_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if session.get("user_id", False):
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for("user_login"))
+    return wrapper
+
+@app.route("/user/logout", methods=["GET"])
+@user_required
+def user_logout():
+    session.pop("user_id", None)
+    return redirect(url_for('user_login'))
     
 
 

@@ -16,6 +16,7 @@ class Product(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     quantity = db.Column(db.Integer())
     price_paid = db.Column(db.Integer())
     time = db.Column(db.DateTime())

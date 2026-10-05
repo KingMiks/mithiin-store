@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Register Your Account{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block content %}
 {% with messages = get_flashed_messages() %}
@@ -10,11 +10,16 @@
   {% endif %}
 {% endwith %}
 <form method="post">
-    <label>Enter email:</label>
+    <lable>Enter email:</lable>
     <input name="email" type="email">
-    <lable>Enter password:</lable>
+    <label>Enter password:</label>
     <input name="password" type="password">
-    <button type="submit">Register</button>
+    <button type="submit">Log in</button>
 </form>
+<p>No account?<a href="{{ url_for('register')}}">Register Here</a></p>
+
+
+
+
 <p>Return to <a href="{{ url_for('home')}}">Homepage</a></p>
 {% endblock %}
