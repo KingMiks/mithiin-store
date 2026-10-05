@@ -169,13 +169,13 @@ def admin_delete(product_id):
 def checkout_success():
     session_id = request.args.get("session_id")
     try:
-        session = stripe.checkout.Session.retrieve(session_id)
+        stripe_session = stripe.checkout.Session.retrieve(session_id)
     except stripe.error.InvalidRequestError:
         return render_template("checkout_failed.html")
-    if session.payment_status == "paid":
-        product_id = int(session.metadata.get('product_id'))
+    if stripe_session.payment_status == "paid":
+        product_id = int(stripe_session.metadata.get('product_id'))
         product = Product.query.get(product_id)
-        new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now())
+        new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=session.get("user_id"))
         product.stock -= new_order.quantity
         db.session.add(new_order)
         db.session.commit()
