@@ -8,7 +8,7 @@
   </head>
   <body>
     <header class="site-header">
-      <a href="{{ url_for('home') }}" class="brand">MITHIIN</a>
+      <a href="{{ url_for('shop.home') }}" class="brand">MITHIIN</a>
       <nav>
         {% if session.get("user_id") %}
         <a href="{{ url_for('account.user_logout') }}">Logout</a>

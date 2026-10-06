@@ -28,7 +28,7 @@ def register():
             new_user = User(email=email, password_hash=password_hash)
             db.session.add(new_user)
             db.session.commit()
-            return redirect(url_for("home"))
+            return redirect(url_for("shop.home"))
     else:
         return render_template("user/register.html")
 
@@ -49,7 +49,7 @@ def user_login():
                 return redirect(url_for('account.user_login'))
             else:
                 session["user_id"] = user.id
-                return redirect(url_for('home'))
+                return redirect(url_for('shop.home'))
     else:
         return render_template("user/login.html")
 

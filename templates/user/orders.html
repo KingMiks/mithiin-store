@@ -6,7 +6,7 @@
 <label> Product Name</label>
 <p> {{ order.product.name }} </p>
 {% if order.product.status == "active" and order.product.stock > 0 %}
-<p><a href="{{ url_for('product_detail', product_id=order.product.id) }}">Buy Again</a></p>
+<p><a href="{{ url_for('shop.product_detail', product_id=order.product.id) }}">Buy Again</a></p>
 {% else %}
     <p>No longer available</p>
 {% endif %}
@@ -16,6 +16,6 @@
 <p> {{ order.time }} </p>
 {% else %}
     <p>No orders yet</p>
-    <p>Return to <a href="{{ url_for('home')}}">Homepage</a></p>
+    <p>Return to <a href="{{ url_for('shop.home')}}">Homepage</a></p>
 {% endfor %}
 {% endblock %}
