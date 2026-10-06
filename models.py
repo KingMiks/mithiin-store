@@ -20,6 +20,8 @@ class Order(db.Model):
     quantity = db.Column(db.Integer())
     price_paid = db.Column(db.Integer())
     time = db.Column(db.DateTime())
+    product = db.relationship("Product")
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)

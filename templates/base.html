@@ -12,6 +12,7 @@
       <nav>
         {% if session.get("user_id") %}
         <a href="{{ url_for('user_logout') }}">Logout</a>
+        <a href="{{ url_for('orders')  }}">My Orders</a>
         {% else %}
         <p> Existing User? <a href="{{ url_for('user_login') }}">Login</a></p>
         <p> New user? <a href="{{ url_for('register') }}">Register Here</a></p>

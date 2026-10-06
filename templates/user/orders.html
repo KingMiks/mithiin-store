@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}My Orders{% endblock %}
+{%block content%}
+
+{% for order in orders %}
+<label> Product Name</label>
+<p> {{ order.product.name }} </p>
+<label> order price</label>
+<p> {{ order.price_paid }} </p>
+<label>Time purchased</label>
+<p> {{ order.time }} </p>
+{% else %}
+    <p>No orders yet</p>
+{% endfor %}
+{% endblock %}
