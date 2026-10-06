@@ -80,8 +80,15 @@ def checkout(product_id):
     product = get_product(product_id)
     if product is None or product.status != "active":
         abort(404)
+    
+    customer_email = None
+    user_id = session.get("user_id")
+    if user_id is not None:
+        user = User.query.filter_by(id=user_id).first()
+        customer_email = user.email
 
-    session = stripe.checkout.Session.create(
+    stripe_session = stripe.checkout.Session.create(
+        
         payment_method_types=["card"],
         line_items=[{
             "price_data": {
@@ -91,12 +98,13 @@ def checkout(product_id):
             },
             "quantity": 1,
         }],
+        customer_email=customer_email,
         mode="payment",
         metadata={"product_id": product.id},
         success_url=url_for("checkout_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=url_for("checkout", product_id=product_id, _external=True),
     )
-    return redirect(session.url, code=303)
+    return redirect(stripe_session.url, code=303)
 
 @app.route("/admin/login", methods = ["GET", "POST"])
 def login():
