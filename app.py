@@ -189,7 +189,11 @@ def checkout_success():
         product_id = int(stripe_session.metadata.get('product_id'))
         product = Product.query.get(product_id)
         new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=session.get("user_id"), stripe_session_id=stripe_session.id)
-        product.stock -= new_order.quantity
+        rows_updated = Product.query.filter(Product.id == product_id, Product.stock > 0).update({"stock": Product.stock - 1})
+        if rows_updated == 0:
+            db.session.rollback()
+            app.logger.warning(f"{session_id} paid for {product_id} when out of stock, refund is needed.")
+            return render_template("checkout_failed.html")
         try:
             db.session.add(new_order)
             db.session.commit()
