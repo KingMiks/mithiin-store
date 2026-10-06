@@ -25,6 +25,7 @@ from flask import (
     url_for,
 )
 from flask_migrate import Migrate
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import Order, Product, User, db
@@ -189,8 +190,11 @@ def checkout_success():
         product = Product.query.get(product_id)
         new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=session.get("user_id"), stripe_session_id=stripe_session.id)
         product.stock -= new_order.quantity
-        db.session.add(new_order)
-        db.session.commit()
+        try:
+            db.session.add(new_order)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
         return render_template("checkout_success.html")
     else:
         return render_template("checkout_failed.html")
