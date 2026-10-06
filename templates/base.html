@@ -11,11 +11,11 @@
       <a href="{{ url_for('home') }}" class="brand">MITHIIN</a>
       <nav>
         {% if session.get("user_id") %}
-        <a href="{{ url_for('user_logout') }}">Logout</a>
-        <a href="{{ url_for('orders')  }}">My Orders</a>
+        <a href="{{ url_for('account.user_logout') }}">Logout</a>
+        <a href="{{ url_for('account.orders')  }}">My Orders</a>
         {% else %}
-        <p> Existing User? <a href="{{ url_for('user_login') }}">Login</a></p>
-        <p> New user? <a href="{{ url_for('register') }}">Register Here</a></p>
+        <p> Existing User? <a href="{{ url_for('account.user_login') }}">Login</a></p>
+        <p> New user? <a href="{{ url_for('account.register') }}">Register Here</a></p>
         {% endif %}
       </nav>
     </header>

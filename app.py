@@ -10,7 +10,6 @@ TODO markers show exactly where real integration will plug in later.
 
 import os
 from datetime import datetime
-from functools import wraps
 
 import stripe
 from dotenv import load_dotenv
@@ -26,9 +25,10 @@ from flask import (
 )
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.security import check_password_hash, generate_password_hash
 
+from helpers import admin_required, user_required
 from models import Order, Product, User, db
+from routes.account import account
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
@@ -36,6 +36,7 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///inventory.db"
+app.register_blueprint(account)
 db.init_app(app)
 Migrate(app, db, render_as_batch=True)
 
@@ -118,15 +119,6 @@ def login():
     else:
         return render_template("admin/login.html")
 
-def admin_required(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if session.get("is_admin", False):
-            return f(*args, **kwargs)
-        else:
-            return redirect(url_for("login"))
-    return wrapper
-
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
@@ -203,67 +195,6 @@ def checkout_success():
     else:
         return render_template("checkout_failed.html")
 
-@app.route("/register", methods =["GET", "POST"])
-def register():
-    if request.method == "POST":
-        email = request.form.get("email")
-        user = User.query.filter_by(email=email).first()
-        password = request.form.get("password")
-        if user is not None:
-            flash("Email already registered")
-            return redirect(url_for('register'))
-        else:
-            password_hash = generate_password_hash(password)
-            new_user = User(email=email, password_hash=password_hash)
-            db.session.add(new_user)
-            db.session.commit()
-            return redirect(url_for("home"))
-    else:
-        return render_template("user/register.html")
-
-@app.route("/user/login", methods=["GET", "POST"])
-def user_login():
-    if request.method == "POST":
-        email = request.form.get("email")
-        user = User.query.filter_by(email=email).first()
-        if user is None:
-            flash("Invalid email or password")
-            return redirect(url_for('user_login'))
-        else:
-            typed_password = request.form.get("password")
-            stored_hash = user.password_hash
-            check_password = check_password_hash(stored_hash, typed_password)
-            if not check_password:
-                flash("Invalid email or password")
-                return redirect(url_for('user_login'))
-            else:
-                session["user_id"] = user.id
-                return redirect(url_for('home'))
-    else:
-        return render_template("user/login.html")
-
-def user_required(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if session.get("user_id", False):
-            return f(*args, **kwargs)
-        else:
-            return redirect(url_for("user_login"))
-    return wrapper
-
-@app.route("/user/logout", methods=["GET"])
-@user_required
-def user_logout():
-    session.pop("user_id", None)
-    return redirect(url_for('user_login'))
-
-@app.route("/account/orders", methods=["GET"])
-@user_required
-def orders():
-    user_id = session.get("user_id")
-    orders = Order.query.filter_by(user_id=user_id).order_by(Order.time.desc()).all()
-    return render_template("user/orders.html", orders=orders)
-    
 
 
 if __name__ == "__main__":
