@@ -36,7 +36,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///inventory.db"
 db.init_app(app)
-Migrate(app, db)
+Migrate(app, db, render_as_batch=True)
 
 # TODO: replace with a real call to the gemstore API once we have the docs/key.
 # For now this is fake data so we can build and test the site's layout and flow.
@@ -173,9 +173,13 @@ def checkout_success():
     except stripe.error.InvalidRequestError:
         return render_template("checkout_failed.html")
     if stripe_session.payment_status == "paid":
+        existing_order = Order.query.filter_by(stripe_session_id=stripe_session.id).first()
+        if existing_order is not None:
+            return render_template("checkout_success.html")
+
         product_id = int(stripe_session.metadata.get('product_id'))
         product = Product.query.get(product_id)
-        new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=session.get("user_id"))
+        new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=session.get("user_id"), stripe_session_id=stripe_session.id)
         product.stock -= new_order.quantity
         db.session.add(new_order)
         db.session.commit()

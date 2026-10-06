@@ -21,6 +21,7 @@ class Order(db.Model):
     price_paid = db.Column(db.Integer())
     time = db.Column(db.DateTime())
     product = db.relationship("Product")
+    stripe_session_id = db.Column(db.String(200), unique=True)
 
 
 class User(db.Model):
