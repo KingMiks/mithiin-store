@@ -14,6 +14,7 @@ import stripe
 from dotenv import load_dotenv
 from flask import Flask
 from flask_migrate import Migrate
+from flask_wtf import CSRFProtect
 
 from models import db
 from routes.account import account
@@ -24,7 +25,8 @@ load_dotenv()  # reads .env locally; on a real host, env vars come from that hos
 app = Flask(__name__)
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///inventory.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///inventory.db")
+csrf = CSRFProtect(app)
 app.register_blueprint(account)
 app.register_blueprint(admin)
 app.register_blueprint(shop)

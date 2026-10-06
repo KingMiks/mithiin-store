@@ -3,6 +3,7 @@
 
 {% block content %}
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Name</label>
     <input name="name" type="text" value="{{ product.name if product else '' }}">
     <label>Cut</label>

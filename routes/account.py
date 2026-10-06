@@ -1,3 +1,4 @@
+from email_validator import EmailNotValidError, validate_email
 from flask import (
     Blueprint,
     flash,
@@ -17,9 +18,17 @@ account = Blueprint("account", __name__)
 @account.route("/register", methods =["GET", "POST"])
 def register():
     if request.method == "POST":
-        email = request.form.get("email")
+        email = request.form.get("email", "").strip()
+        try:
+            validate_email(email, check_deliverability=False)
+        except EmailNotValidError:
+            flash("Please enter a valid email address")
+            return redirect(url_for("account.register"))
         user = User.query.filter_by(email=email).first()
-        password = request.form.get("password")
+        password = request.form.get("password", "")
+        if len(password) < 8:
+            flash("Password must be at least 8 characters.")
+            return redirect(url_for('account.register'))
         if user is not None:
             flash("Email already registered")
             return redirect(url_for('account.register'))

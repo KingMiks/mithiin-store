@@ -18,6 +18,7 @@
   <p>{{ item.status }}</p>
 <a href="{{ url_for('admin.admin_edit', product_id=item.id) }}">Edit</a>
 <form method="post" action="{{ url_for('admin.admin_delete', product_id=item.id) }}" onsubmit="return confirm('Delete {{item.name}}?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <button type="submit">Delete</button>
 </form>
 {% endfor %}
