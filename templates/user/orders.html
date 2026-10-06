@@ -5,6 +5,11 @@
 {% for order in orders %}
 <label> Product Name</label>
 <p> {{ order.product.name }} </p>
+{% if order.product.status == "active" and order.product.stock > 0 %}
+<p><a href="{{ url_for('product_detail', product_id=order.product.id) }}">Buy Again</a></p>
+{% else %}
+    <p>No longer available</p>
+{% endif %}
 <label> order price</label>
 <p> {{ order.price_paid }} </p>
 <label>Time purchased</label>
