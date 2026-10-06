@@ -26,6 +26,9 @@ app = Flask(__name__)
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///inventory.db")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.getenv("COOKIE_SECURE", "false").lower() == "true"
 csrf = CSRFProtect(app)
 app.register_blueprint(account)
 app.register_blueprint(admin)
