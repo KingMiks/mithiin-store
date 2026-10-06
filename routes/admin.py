@@ -9,10 +9,11 @@ from flask import (
     request,
     session,
     url_for,
+    abort
 )
 
 from helpers import admin_required, get_inventory
-from models import Product, db
+from models import Order, Product, db
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 
@@ -73,6 +74,11 @@ def admin_logout():
 @admin_required
 def admin_delete(product_id):
     product = Product.query.get(product_id)
-    db.session.delete(product)
-    db.session.commit()
+    if product is None:
+        abort(404)
+    if Order.query.filter_by(product_id=product_id).first() is not None:
+        flash("Orders of this item exist. Cannot delete this item")
+    else:
+        db.session.delete(product)
+        db.session.commit()
     return redirect(url_for("admin.admin_dashboard"))
