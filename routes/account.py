@@ -10,6 +10,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from extensions import limiter
 from helpers import user_required
 from models import Order, User, db
 
@@ -42,15 +43,16 @@ def register():
         return render_template("user/register.html")
 
 @account.route("/user/login", methods=["GET", "POST"])
+@limiter.limit("10 per minute", methods=["POST"])
 def user_login():
     if request.method == "POST":
-        email = request.form.get("email")
+        email = request.form.get("email", "")
         user = User.query.filter_by(email=email).first()
         if user is None:
             flash("Invalid email or password")
             return redirect(url_for('account.user_login'))
         else:
-            typed_password = request.form.get("password")
+            typed_password = request.form.get("password","")
             stored_hash = user.password_hash
             check_password = check_password_hash(stored_hash, typed_password)
             if not check_password:

@@ -16,6 +16,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 
+from extensions import limiter
 from models import db
 from routes.account import account
 from routes.admin import admin
@@ -34,6 +35,7 @@ app.register_blueprint(account)
 app.register_blueprint(admin)
 app.register_blueprint(shop)
 db.init_app(app)
+limiter.init_app(app)
 Migrate(app, db, render_as_batch=True)
 
 # TODO: replace with a real call to the gemstore API once we have the docs/key.

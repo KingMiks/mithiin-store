@@ -3,15 +3,16 @@ import os
 from dotenv import load_dotenv
 from flask import (
     Blueprint,
+    abort,
     flash,
     redirect,
     render_template,
     request,
     session,
     url_for,
-    abort
 )
 
+from extensions import limiter
 from helpers import admin_required, get_inventory
 from models import Order, Product, db
 
@@ -21,6 +22,7 @@ admin = Blueprint("admin", __name__)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 
 @admin.route("/admin/login", methods = ["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def login():
     if request.method == "POST" and ADMIN_PASSWORD and request.form.get("password") == ADMIN_PASSWORD:
         session["is_admin"] = True
@@ -52,6 +54,8 @@ def admin_add():
 @admin_required
 def admin_edit(product_id):
     product = Product.query.get(product_id)
+    if product is None:
+            abort(404)
     if request.method == "POST":
         product.name = request.form.get("name")
         product.cut = request.form.get("cut")
