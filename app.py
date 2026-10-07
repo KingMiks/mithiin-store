@@ -12,7 +12,7 @@ import os
 
 import stripe
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, render_template
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 
@@ -41,5 +41,21 @@ Migrate(app, db, render_as_batch=True)
 # TODO: replace with a real call to the gemstore API once we have the docs/key.
 # For now this is fake data so we can build and test the site's layout and flow.
 # requests = url(API_KEY)
+
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("error.html", title="Not Found", message="We couldn't find that page."), 404
+
+@app.errorhandler(429)
+def attempt_limit(error):
+    return render_template("error.html", title="Too many attempts", message="You've made too many attempts. Please wait a bit and try again."), 429
+
+@app.errorhandler(500)
+def developer_error(error):
+    return render_template("error.html", title="Something went wrong", message="We hit a problem on our end. Please try again in a few minutes. If you have any issues please contact us with the email below, thank you."), 500
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
