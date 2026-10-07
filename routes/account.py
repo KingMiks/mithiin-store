@@ -76,4 +76,5 @@ def orders():
     user_id = session.get("user_id")
     orders = Order.query.filter_by(user_id=user_id).order_by(Order.time.desc()).all()
     return render_template("user/orders.html", orders=orders)
+
     
