@@ -45,26 +45,30 @@ def checkout(product_id):
     user_id = session.get("user_id")
     if user_id is not None:
         user = User.query.filter_by(id=user_id).first()
-        customer_email = user.email
-
-    stripe_session = stripe.checkout.Session.create(
+        if user is not None:
+            customer_email = user.email
+    try:
+        stripe_session = stripe.checkout.Session.create(
         
-        payment_method_types=["card"],
-        line_items=[{
-            "price_data": {
-                "currency": "usd",
-                "product_data": {"name": product.name},
-                "unit_amount": product.price * 100, 
-            },
-            "quantity": 1,
-        }],
-        customer_email=customer_email,
-        mode="payment",
-        metadata={"product_id": product.id},
-        success_url=url_for("shop.checkout_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url=url_for("shop.product_detail", product_id=product_id, _external=True),
-    )
-    return redirect(stripe_session.url, code=303)
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {"name": product.name},
+                    "unit_amount": product.price * 100, 
+                },
+                "quantity": 1,
+            }],
+            customer_email=customer_email,
+            mode="payment",
+            metadata={"product_id": product.id},
+            success_url=url_for("shop.checkout_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=url_for("shop.product_detail", product_id=product_id, _external=True),
+        )
+        return redirect(stripe_session.url, code=303)
+    except stripe.error.StripeError as e:
+        current_app.logger.warning(f"Stripe checkout failed for product {product_id}: {e}")
+        return render_template("error.html", title="Transaction failed", message="Stripe Checkout failed, no transaction was taken. Please try again."), 502
 
 @shop.route("/checkout/success")
 def checkout_success():
