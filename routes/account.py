@@ -17,6 +17,7 @@ from models import Order, User, db
 account = Blueprint("account", __name__)
 
 @account.route("/register", methods =["GET", "POST"])
+@limiter.limit("5 per hour", methods=["POST"])
 def register():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
