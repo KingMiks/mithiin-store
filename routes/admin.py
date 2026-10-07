@@ -86,3 +86,9 @@ def admin_delete(product_id):
         db.session.delete(product)
         db.session.commit()
     return redirect(url_for("admin.admin_dashboard"))
+
+@admin.route("/admin/orders", methods=["GET"])
+@admin_required
+def admin_orders():
+    orders = Order.query.order_by(Order.time.desc()).all()
+    return render_template("admin/orders.html", orders=orders)

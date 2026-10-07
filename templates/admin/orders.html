@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+<table>
+  <tr>
+    <th>Order number</th>
+    <th>Date</th>
+    <th>Customer</th>
+    <th>Product Name</th>
+    <th>Price paid</th>
+    <th>Stripe session ID</th>
+  </tr>
+  {% for order in orders %}
+  <tr>
+    <td>{{ order.id }}</td>
+      <td>{{ order.time.strftime("%b %d, %Y %I:%M %p") }}</td>
+    {% if order.user.email %}
+    <td>{{order.user.email}}</td>
+    {% else %}
+    <td>Guest</td>
+    {% endif %}
+    <td>{{order.product.name}}</td>
+    <td>${{ "{:,}".format(order.price_paid) }}</td>
+    <td>{{order.stripe_session_id}}</td>
+  </tr>
+  {% else %}
+  <tr>
+    <td colspan="6">No Orders yet</td>
+  </tr>
+  {% endfor %}
+</table>
+
+ <a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+ {% endblock %}

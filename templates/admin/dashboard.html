@@ -22,5 +22,6 @@
   <button type="submit">Delete</button>
 </form>
 {% endfor %}
+<a href="{{ url_for('admin.admin_orders') }}">Orders</a>
 <a href="{{ url_for('admin.admin_logout') }}">Logout</a>
 {% endblock %}
