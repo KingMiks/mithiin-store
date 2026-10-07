@@ -4,7 +4,12 @@ block content %}
   <h1>Success!</h1>
   <div class="checkout-message">
     <p><strong>Checkout Successful.</strong></p>
+    {% if user_id %}
+    <p>Thank you {{user_id}} for your purchase!</p>
+    {% else %}
     <p>Thank you for your purchase!</p>
+    {% endif %}
+    <p> You bought {{product_name}} for ${{ "{:,}".format(price_paid) }}.</p>
     <p>Return to <a href="{{ url_for('shop.home')}}">Homepage</a></p>
   </div>
 </section>

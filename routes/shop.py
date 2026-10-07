@@ -69,6 +69,12 @@ def checkout(product_id):
 @shop.route("/checkout/success")
 def checkout_success():
     session_id = request.args.get("session_id")
+    email = None
+    user_id = session.get("user_id")
+    if user_id is not None:
+        user = User.query.filter_by(id=user_id).first()
+        if user is not None:
+            email = user.email
     try:
         stripe_session = stripe.checkout.Session.retrieve(session_id)
     except stripe.error.InvalidRequestError:
@@ -76,7 +82,7 @@ def checkout_success():
     if stripe_session.payment_status == "paid":
         existing_order = Order.query.filter_by(stripe_session_id=stripe_session.id).first()
         if existing_order is not None:
-            return render_template("checkout_success.html")
+            return render_template("checkout_success.html", product_name=existing_order.product.name, price_paid=existing_order.price_paid, user_id=email)
 
         product_id = int(stripe_session.metadata.get('product_id'))
         product = Product.query.get(product_id)
@@ -91,6 +97,6 @@ def checkout_success():
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-        return render_template("checkout_success.html")
+        return render_template("checkout_success.html", product_name=product.name, price_paid=product.price, user_id=email)
     else:
         return render_template("checkout_failed.html")
