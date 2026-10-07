@@ -77,4 +77,16 @@ def orders():
     orders = Order.query.filter_by(user_id=user_id).order_by(Order.time.desc()).all()
     return render_template("user/orders.html", orders=orders)
 
+@account.route("/account")
+@user_required
+def account_home():
+        user_id = session.get("user_id")
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            session.pop("user_id", None)
+            return redirect(url_for('account.user_login'))
+        else:
+            orders = Order.query.filter_by(user_id=user_id).order_by(Order.time.desc()).limit(3).all()
+            return render_template("user/account.html", orders=orders, user=user)
+
     

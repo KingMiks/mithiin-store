@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}My Account{% endblock %}
+
+{% block content %}
+<p>Signed in as: {{ user.email }}</p>
+<table>
+    <tr>
+    <th>Order number</th>
+    <th>Date</th>
+    <th>Product Name</th>
+    <th>Price paid</th>
+    </tr>
+{% for order in orders %}
+<tr>
+    <td>{{ order.id }}</td>
+    <td>{{ order.time.strftime("%b %d, %Y %I:%M %p") }}</td>
+    <td>{{order.product.name}}</td>
+    <td>${{ "{:,}".format(order.price_paid) }}</td>
+
+</tr>
+ {% else %}
+  <tr>
+    <td colspan="4">No Orders yet</td>
+  </tr>
+  {% endfor %}
+</table>
+<a href="{{ url_for('account.orders') }}">My Orders</a>
+<a href="{{ url_for('account.user_logout') }}">Log Out</a>
+ {% endblock %}
