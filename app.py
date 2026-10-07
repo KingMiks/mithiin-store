@@ -1,11 +1,7 @@
 """
-Mithiin — Flask skeleton
-------------------------
-This is a starting structure for the real store. Right now everything
-runs on MOCK_INVENTORY (fake data) so the site is fully clickable and
-testable before the gemstore API and Stripe Connect are wired in.
-
-TODO markers show exactly where real integration will plug in later.
+Mithiin store - app setup.
+Configures Flask, extensions and blueprints, and registers the error pages.
+The gemstore API and Stripe Connect are not wired in yet.
 """
 
 import os
@@ -37,10 +33,6 @@ app.register_blueprint(shop)
 db.init_app(app)
 limiter.init_app(app)
 Migrate(app, db, render_as_batch=True)
-
-# TODO: replace with a real call to the gemstore API once we have the docs/key.
-# For now this is fake data so we can build and test the site's layout and flow.
-# requests = url(API_KEY)
 
 @app.errorhandler(404)
 def not_found(error):

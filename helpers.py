@@ -28,10 +28,8 @@ def user_required(f):
     return wrapper
 
 def get_inventory():
-    """TODO: swap this out for a real gemstore API call, e.g.:
-    response = requests.get(GEMSTORE_API_URL + "/inventory", headers={"Authorization": f"Bearer {API_KEY}"})
-    return response.json()
-    """
+    # TODO: once we have the gemstore API docs and key, replace this with real API calls.
+    # For now it reads from our own SQLite database.
     return Product.query.all()
 
 def get_public_inventory():

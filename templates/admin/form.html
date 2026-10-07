@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Add Product{% endblock %}
+{% block title %}Save Product{% endblock %}
 
 {% block content %}
 <form method="post">
@@ -22,6 +22,6 @@
   <option value="hidden" {{ 'selected' if product and product.status == "hidden" else '' }}>Hidden</option>
   <option value="coming_soon" {{ 'selected' if product and product.status == "coming_soon" else '' }}>Coming Soon</option>
 </select>
-    <button type="submit">Finish Edit</button>
+    <button type="submit">Save</button>
 </form>
 {% endblock %}
