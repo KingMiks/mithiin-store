@@ -90,6 +90,9 @@ def checkout_success():
 
         product_id = int(stripe_session.metadata.get('product_id'))
         product = db.session.get(Product, product_id)
+        if product is None:
+            current_app.logger.warning(f"{session_id} paid for {product_id} which was deleted by an admin in real time, refund is needed.")
+            return render_template("checkout_failed.html")
         new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=session.get("user_id"), stripe_session_id=stripe_session.id)
         rows_updated = Product.query.filter(Product.id == product_id, Product.stock > 0).update({"stock": Product.stock - 1})
         if rows_updated == 0:
