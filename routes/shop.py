@@ -89,7 +89,7 @@ def checkout_success():
             return render_template("checkout_success.html", product_name=existing_order.product.name, price_paid=existing_order.price_paid, user_id=email)
 
         product_id = int(stripe_session.metadata.get('product_id'))
-        product = Product.query.get(product_id)
+        product = db.session.get(Product, product_id)
         new_order = Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=session.get("user_id"), stripe_session_id=stripe_session.id)
         rows_updated = Product.query.filter(Product.id == product_id, Product.stock > 0).update({"stock": Product.stock - 1})
         if rows_updated == 0:

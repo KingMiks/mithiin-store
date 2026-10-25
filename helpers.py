@@ -6,7 +6,7 @@ from flask import (
     url_for,
 )
 
-from models import Product
+from models import Product, db
 
 
 def admin_required(f):
@@ -38,4 +38,4 @@ def get_public_inventory():
 
 def get_product(product_id):
     """TODO: swap for a real single-item API call once available."""
-    return Product.query.get(product_id)
+    return db.session.get(Product, product_id)

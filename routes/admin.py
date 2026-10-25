@@ -53,7 +53,7 @@ def admin_add():
 @admin.route("/admin/edit/<int:product_id>", methods = ["GET", "POST"])
 @admin_required
 def admin_edit(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if product is None:
             abort(404)
     if request.method == "POST":
@@ -77,7 +77,7 @@ def admin_logout():
 @admin.route("/admin/delete/<int:product_id>", methods = ["POST"])
 @admin_required
 def admin_delete(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if product is None:
         abort(404)
     if Order.query.filter_by(product_id=product_id).first() is not None:
