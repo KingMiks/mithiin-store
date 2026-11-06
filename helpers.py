@@ -1,4 +1,5 @@
 from functools import wraps
+from decimal import Decimal
 
 from flask import (
     redirect,
@@ -39,3 +40,6 @@ def get_public_inventory():
 def get_product(product_id):
     """TODO: swap for a real single-item API call once available."""
     return db.session.get(Product, product_id)
+
+def to_cents(amount):
+    return int(Decimal(amount) * 100)

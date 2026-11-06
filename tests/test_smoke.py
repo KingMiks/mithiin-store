@@ -1,5 +1,6 @@
 from models import User, db, Product, Order
 from datetime import datetime
+from helpers import to_cents
 def test_homepage_loads(client):
     response = client.get("/")
     assert response.status_code == 200
@@ -96,3 +97,9 @@ def test_stock_not_shown_to_shoppers(client):
     response = client.get(f"/product/{product.id}")
     assert response.status_code == 200
     assert b"7342" not in response.data
+
+def test_to_cents_conversion():
+    case1 = to_cents("150.49")
+    case2 = to_cents("4.35")
+    assert case1 == 15049
+    assert case2 == 435
