@@ -1,5 +1,5 @@
-from functools import wraps
 from decimal import Decimal
+from functools import wraps
 
 from flask import (
     redirect,
@@ -43,3 +43,7 @@ def get_product(product_id):
 
 def to_cents(amount):
     return int(Decimal(amount) * 100)
+
+def format_price(amount):
+    dollars, cents = divmod(amount, 100)
+    return f"${dollars:,}.{cents:02d}"

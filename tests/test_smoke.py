@@ -1,6 +1,9 @@
-from models import User, db, Product, Order
 from datetime import datetime
-from helpers import to_cents
+
+from helpers import format_price, to_cents
+from models import db, Order, Product, User
+
+
 def test_homepage_loads(client):
     response = client.get("/")
     assert response.status_code == 200
@@ -103,3 +106,9 @@ def test_to_cents_conversion():
     case2 = to_cents("4.35")
     assert case1 == 15049
     assert case2 == 435
+
+def test_formatting_price():
+    case1 = format_price(123450)
+    case2 = format_price(105)
+    assert case1 == "$1,234.50"
+    assert case2 == "$1.05"
