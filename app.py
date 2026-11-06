@@ -17,6 +17,7 @@ from models import db
 from routes.account import account
 from routes.admin import admin
 from routes.shop import shop
+from helpers import format_price
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
@@ -26,6 +27,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///inv
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.getenv("COOKIE_SECURE", "false").lower() == "true"
+app.jinja_env.filters["price"] = format_price
 csrf = CSRFProtect(app)
 app.register_blueprint(account)
 app.register_blueprint(admin)
