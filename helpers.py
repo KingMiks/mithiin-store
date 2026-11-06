@@ -47,3 +47,7 @@ def to_cents(amount):
 def format_price(amount):
     dollars, cents = divmod(amount, 100)
     return f"${dollars:,}.{cents:02d}"
+
+def cents_to_dollars(amount):
+    dollars, cents = divmod(amount, 100)
+    return f"{dollars}.{cents:02d}"

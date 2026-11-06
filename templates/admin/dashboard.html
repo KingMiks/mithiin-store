@@ -13,7 +13,7 @@
   <p>{{ item.name }}</p>
   <p>{{ item.cut }}</p>
   <p>{{ item.carat }}</p>
-  <p>{{ item.price }}</p>
+  <p>{{ item.price| price }}</p>
   <p>{{ item.stock }}</p>
   <p>{{ item.status }}</p>
 <a href="{{ url_for('admin.admin_edit', product_id=item.id) }}">Edit</a>

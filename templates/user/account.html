@@ -15,7 +15,7 @@
     <td>{{ order.id }}</td>
     <td>{{ order.time.strftime("%b %d, %Y %I:%M %p") }}</td>
     <td>{{order.product.name}}</td>
-    <td>${{ "{:,}".format(order.price_paid) }}</td>
+    <td>{{ order.price|price }}</td>
 
 </tr>
  {% else %}

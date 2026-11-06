@@ -21,7 +21,7 @@
     <td>Guest</td>
     {% endif %}
     <td>{{order.product.name}}</td>
-    <td>${{ "{:,}".format(order.price_paid) }}</td>
+    <td>{{ order.price|price }}</td>
     <td>{{order.stripe_session_id}}</td>
   </tr>
   {% else %}

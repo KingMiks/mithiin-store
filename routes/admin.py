@@ -13,7 +13,7 @@ from flask import (
 )
 
 from extensions import limiter
-from helpers import admin_required, get_inventory
+from helpers import admin_required, get_inventory, to_cents
 from models import Order, Product, db
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
@@ -44,7 +44,7 @@ def admin_dashboard():
 def admin_add():
     if request.method == "POST":
         new_product = Product(name=request.form.get("name"), cut=request.form.get("cut"), carat= float(request.form.get("carat")),
-                          price= int(request.form.get("price")), stock= int(request.form.get("stock")), image=request.form.get("image"), status = request.form.get("status"))
+                          price= to_cents(request.form.get("price")), stock= int(request.form.get("stock")), image=request.form.get("image"), status = request.form.get("status"))
         db.session.add(new_product)
         db.session.commit()
         return redirect(url_for("admin.admin_dashboard"))
@@ -60,7 +60,7 @@ def admin_edit(product_id):
         product.name = request.form.get("name")
         product.cut = request.form.get("cut")
         product.carat = float(request.form.get("carat"))
-        product.price = int(request.form.get("price"))
+        product.price = to_cents(request.form.get("price"))
         product.stock = int(request.form.get("stock"))
         product.image = request.form.get("image")
         product.status = request.form.get("status")

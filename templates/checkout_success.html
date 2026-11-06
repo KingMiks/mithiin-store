@@ -9,7 +9,7 @@ block content %}
     {% else %}
     <p>Thank you for your purchase!</p>
     {% endif %}
-    <p> You bought {{product_name}} for ${{ "{:,}".format(price_paid) }}.</p>
+    <p> You bought {{product_name}} for {{ price_paid|price }}.</p>
     <p>Return to <a href="{{ url_for('shop.home')}}">Homepage</a></p>
   </div>
 </section>

@@ -11,7 +11,7 @@
     <label>Carat</label>
     <input name="carat" type="number" step="0.01" value="{{ product.carat if product else '' }}">
     <label>Price</label>
-    <input name="price" type="number" value="{{ product.price if product else '' }}">
+    <input name="price" type="number" step="0.01" value="{{ product.price| dollars if product else '' }}">
     <label>Stock</label>
     <input name="stock" type="number" value="{{ product.stock if product else '' }}">
     <label>Image</label>

@@ -55,7 +55,7 @@ def checkout(product_id):
                 "price_data": {
                     "currency": "usd",
                     "product_data": {"name": product.name},
-                    "unit_amount": product.price * 100, 
+                    "unit_amount": product.price, 
                 },
                 "quantity": 1,
             }],

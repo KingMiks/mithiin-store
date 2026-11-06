@@ -11,7 +11,7 @@
     <p>No longer available</p>
 {% endif %}
 <label> order price</label>
-<p> {{ order.price_paid }} </p>
+<p> {{ order.price_paid| price }} </p>
 <label>Time purchased</label>
 <p> {{ order.time }} </p>
 {% else %}

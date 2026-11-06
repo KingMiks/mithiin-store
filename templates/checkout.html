@@ -4,7 +4,7 @@
 {% block content %}
 <section class="checkout">
   <h1>Checkout</h1>
-  <p>{{ product.name }} — ${{ "{:,}".format(product.price) }}</p>
+  <p>{{ product.name }} — {{ product.price|price }}</p>
 
   <div class="checkout-stub">
     <p><strong>Payment isn't wired up yet.</strong></p>

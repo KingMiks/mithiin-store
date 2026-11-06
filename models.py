@@ -8,7 +8,7 @@ class Product(db.Model):
     name = db.Column(db.String(200), nullable=False)
     cut = db.Column(db.String(200), nullable=False)
     carat = db.Column(db.Float())
-    price = db.Column(db.Integer())
+    price = db.Column(db.Integer()) # in cents, e.g. 123450 = $1,234.50
     stock = db.Column(db.Integer())
     image = db.Column(db.String(200))
     status = db.Column(db.String(200), default="coming_soon")
@@ -18,7 +18,7 @@ class Order(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     quantity = db.Column(db.Integer())
-    price_paid = db.Column(db.Integer())
+    price_paid = db.Column(db.Integer()) # in cents, e.g. 123450 = $1,234.50
     time = db.Column(db.DateTime())
     product = db.relationship("Product")
     user = db.relationship("User")
