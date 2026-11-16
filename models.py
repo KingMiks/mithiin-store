@@ -10,8 +10,18 @@ class Product(db.Model):
     carat = db.Column(db.Float())
     price = db.Column(db.Integer()) # in cents, e.g. 123450 = $1,234.50
     stock = db.Column(db.Integer())
-    image = db.Column(db.String(200))
+    image = db.Column(db.String(500))
     status = db.Column(db.String(200), default="coming_soon")
+    stone_no = db.Column(db.String(50), unique=True)
+    cut = db.Column(db.String(200))
+    color = db.Column(db.String(200))
+    clarity = db.Column(db.String(200))
+    polish = db.Column(db.String(200))
+    symmetry = db.Column(db.String(200))
+    lab = db.Column(db.String(200))
+    report_no = db.Column(db.String(200))
+    certificate_url = db.Column(db.String(500))
+    video_url = db.Column(db.String(500))
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
