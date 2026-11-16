@@ -6,7 +6,7 @@ db = SQLAlchemy()
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
-    cut = db.Column(db.String(200), nullable=False)
+    shape = db.Column(db.String(200), nullable=False)
     carat = db.Column(db.Float())
     price = db.Column(db.Integer()) # in cents, e.g. 123450 = $1,234.50
     stock = db.Column(db.Integer())

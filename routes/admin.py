@@ -43,7 +43,7 @@ def admin_dashboard():
 @admin_required
 def admin_add():
     if request.method == "POST":
-        new_product = Product(name=request.form.get("name"), cut=request.form.get("cut"), carat= float(request.form.get("carat")),
+        new_product = Product(name=request.form.get("name"), shape=request.form.get("shape"), carat= float(request.form.get("carat")),
                           price= to_cents(request.form.get("price")), stock= int(request.form.get("stock")), image=request.form.get("image"), status = request.form.get("status"))
         db.session.add(new_product)
         db.session.commit()
@@ -58,7 +58,7 @@ def admin_edit(product_id):
             abort(404)
     if request.method == "POST":
         product.name = request.form.get("name")
-        product.cut = request.form.get("cut")
+        product.shape = request.form.get("shape")
         product.carat = float(request.form.get("carat"))
         product.price = to_cents(request.form.get("price"))
         product.stock = int(request.form.get("stock"))

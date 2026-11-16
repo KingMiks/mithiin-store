@@ -66,7 +66,7 @@ def test_edit_missing_product_gives_404(client):
     assert response.status_code == 404
 
 def test_deleting_product_with_orders_is_refused(client):
-    product = Product(name="diamond", cut="princess", carat=24, price=10050, stock=10, image="", status="active")
+    product = Product(name="diamond", shape="princess", carat=24, price=10050, stock=10, image="", status="active")
     db.session.add(product)
     db.session.commit()
     order = Order(product_id = product.id, quantity=1, price_paid=100, time=datetime.now(), stripe_session_id ="2xd21")
@@ -79,7 +79,7 @@ def test_deleting_product_with_orders_is_refused(client):
     assert b"Orders of this item exist. Cannot delete this item" in response.data
 
 def test_active_product_page_loads(client):
-    product = Product(name="zzqtestgem", cut="princess", carat=24, price=1050, stock=10, image="", status="active")
+    product = Product(name="zzqtestgem", shape="princess", carat=24, price=1050, stock=10, image="", status="active")
     db.session.add(product)
     db.session.commit()
     response = client.get(f"/product/{product.id}")
@@ -87,14 +87,14 @@ def test_active_product_page_loads(client):
     assert b"zzqtestgem" in response.data
 
 def test_coming_soon_product_cannot_be_bought(client):
-    product = Product(name="zzqtestgem", cut="princess", carat=24, price=10050, stock=10, image="", status="coming_soon")
+    product = Product(name="zzqtestgem", shape="princess", carat=24, price=10050, stock=10, image="", status="coming_soon")
     db.session.add(product)
     db.session.commit()
     response = client.get(f"/checkout/{product.id}")
     assert response.status_code == 404
 
 def test_stock_not_shown_to_shoppers(client):
-    product = Product(name="awefacweftestgem", cut="princess", carat=24, price=10050, stock=7342, image="", status="active")
+    product = Product(name="awefacweftestgem", shape="princess", carat=24, price=10050, stock=7342, image="", status="active")
     db.session.add(product)
     db.session.commit()
     response = client.get(f"/product/{product.id}")

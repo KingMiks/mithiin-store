@@ -11,7 +11,7 @@
 <a href="{{ url_for('admin.admin_add')}}">Add item</a>
 {% for item in inventory %}
   <p>{{ item.name }}</p>
-  <p>{{ item.cut }}</p>
+  <p>{{ item.shape }}</p>
   <p>{{ item.carat }}</p>
   <p>{{ item.price| price }}</p>
   <p>{{ item.stock }}</p>
