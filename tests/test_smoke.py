@@ -104,8 +104,12 @@ def test_stock_not_shown_to_shoppers(client):
 def test_to_cents_conversion():
     case1 = to_cents("150.49")
     case2 = to_cents("4.35")
+    case3 = to_cents(79.05)
+    case4 = to_cents(2072.54)
     assert case1 == 15049
     assert case2 == 435
+    assert case3 == 7905
+    assert case4 == 207254
 
 def test_formatting_price():
     case1 = format_price(123450)

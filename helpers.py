@@ -42,7 +42,7 @@ def get_product(product_id):
     return db.session.get(Product, product_id)
 
 def to_cents(amount):
-    return int(Decimal(amount) * 100)
+    return int(Decimal(str(amount)) * 100)
 
 def format_price(amount):
     dollars, cents = divmod(amount, 100)
