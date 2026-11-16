@@ -2,6 +2,7 @@ from datetime import datetime
 
 from helpers import format_price, to_cents, cents_to_dollars
 from models import db, Order, Product, User
+from gemstore import stone_from_api
 
 
 def test_homepage_loads(client):
@@ -122,3 +123,24 @@ def test_cents_to_dollars():
     case2 = cents_to_dollars(105)
     assert case1 == "1000.00"
     assert case2 == "1.05"
+
+def test_stone_from_api():
+    raw = {'Stone_NO': 'P86I-22', 
+           'Shape': 'PEAR', 
+           'Weight': "5.140", 
+           'SaleAmt': 8224.0, 
+           'Cut': '', 
+           'Color': 'D', 
+           'Clarity': 'FLAWLESS', 
+           'Polish': 'EX', 
+           'Symm': 'EX', 
+           'Lab': 'IGI', 
+           'Lab_Report_No': '804664633', 
+           'Stone_Img_url': 'https://diamondurl.com/Imaged/P86I-22/still.jpg', 
+           'Certificate_file_url': 'https://diamondurl.com/certificate/804664633.pdf', 
+           'Video_url': 'https://diamondurl.com/Vision360.html?d=P86I-22'
+    }
+    stone  = stone_from_api(raw)
+    assert stone["stone_no"] == "P86I-22"
+    assert stone["carat"] == 5.14
+    assert stone["price"] == 822400
