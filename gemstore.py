@@ -17,3 +17,6 @@ def stone_from_api(raw):
         "certificate_url": raw["Certificate_file_url"],
         "video_url": raw["Video_url"],
     }
+
+def stone_name(carat, shape):
+    return f"{carat:.2f} ct {shape.title()} Lab-Grown Diamond"

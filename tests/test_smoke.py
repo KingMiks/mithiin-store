@@ -2,7 +2,7 @@ from datetime import datetime
 
 from helpers import format_price, to_cents, cents_to_dollars
 from models import db, Order, Product, User
-from gemstore import stone_from_api
+from gemstore import stone_from_api, stone_name
 
 
 def test_homepage_loads(client):
@@ -144,3 +144,9 @@ def test_stone_from_api():
     assert stone["stone_no"] == "P86I-22"
     assert stone["carat"] == 5.14
     assert stone["price"] == 822400
+
+def test_stone_name():
+    pear = stone_name(5.14, "PEAR")
+    stone = stone_name(1.0, "ROUND")
+    assert pear == ("5.14 ct Pear Lab-Grown Diamond")
+    assert stone == ("1.00 ct Round Lab-Grown Diamond")
