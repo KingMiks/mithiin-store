@@ -1,4 +1,5 @@
 from helpers import to_cents
+from models import Product, db
 
 def stone_from_api(raw):
     return {
@@ -20,3 +21,14 @@ def stone_from_api(raw):
 
 def stone_name(carat, shape):
     return f"{carat:.2f} ct {shape.title()} Lab-Grown Diamond"
+
+def upsert_stone(values):
+    stone = Product.query.filter_by(stone_no=values["stone_no"]).first()
+    if stone is None:
+        stone = Product(**values, name=stone_name(carat=values["carat"], shape=values["shape"]), stock=1, status="pending")
+        db.session.add(stone)
+    else:
+        for key, value  in values.items():
+            setattr(stone, key, value)
+
+    return stone

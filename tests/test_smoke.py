@@ -2,7 +2,23 @@ from datetime import datetime
 
 from helpers import format_price, to_cents, cents_to_dollars
 from models import db, Order, Product, User
-from gemstore import stone_from_api, stone_name
+from gemstore import stone_from_api, stone_name, upsert_stone
+
+SAMPLE_STONE = {'Stone_NO': 'P86I-22', 
+           'Shape': 'PEAR', 
+           'Weight': "5.140", 
+           'SaleAmt': 8224.0, 
+           'Cut': '', 
+           'Color': 'D', 
+           'Clarity': 'FLAWLESS', 
+           'Polish': 'EX', 
+           'Symm': 'EX', 
+           'Lab': 'IGI', 
+           'Lab_Report_No': '804664633', 
+           'Stone_Img_url': 'https://diamondurl.com/Imaged/P86I-22/still.jpg', 
+           'Certificate_file_url': 'https://diamondurl.com/certificate/804664633.pdf', 
+           'Video_url': 'https://diamondurl.com/Vision360.html?d=P86I-22'
+    }
 
 
 def test_homepage_loads(client):
@@ -125,22 +141,7 @@ def test_cents_to_dollars():
     assert case2 == "1.05"
 
 def test_stone_from_api():
-    raw = {'Stone_NO': 'P86I-22', 
-           'Shape': 'PEAR', 
-           'Weight': "5.140", 
-           'SaleAmt': 8224.0, 
-           'Cut': '', 
-           'Color': 'D', 
-           'Clarity': 'FLAWLESS', 
-           'Polish': 'EX', 
-           'Symm': 'EX', 
-           'Lab': 'IGI', 
-           'Lab_Report_No': '804664633', 
-           'Stone_Img_url': 'https://diamondurl.com/Imaged/P86I-22/still.jpg', 
-           'Certificate_file_url': 'https://diamondurl.com/certificate/804664633.pdf', 
-           'Video_url': 'https://diamondurl.com/Vision360.html?d=P86I-22'
-    }
-    stone  = stone_from_api(raw)
+    stone  = stone_from_api(SAMPLE_STONE)
     assert stone["stone_no"] == "P86I-22"
     assert stone["carat"] == 5.14
     assert stone["price"] == 822400
@@ -148,5 +149,25 @@ def test_stone_from_api():
 def test_stone_name():
     pear = stone_name(5.14, "PEAR")
     stone = stone_name(1.0, "ROUND")
-    assert pear == ("5.14 ct Pear Lab-Grown Diamond")
-    assert stone == ("1.00 ct Round Lab-Grown Diamond")
+    assert pear == "5.14 ct Pear Lab-Grown Diamond"
+    assert stone == "1.00 ct Round Lab-Grown Diamond"
+
+def test_upsert_stone(client):
+    values = stone_from_api(SAMPLE_STONE)
+    upsert_stone(values)
+    db.session.commit()
+    stone = Product.query.filter_by(stone_no=values["stone_no"]).first()
+    assert stone.name == "5.14 ct Pear Lab-Grown Diamond"
+    assert stone.stock == 1
+    assert stone.status == "pending"
+
+    stone.stock = 0
+    stone.status = "hidden"
+    db.session.commit()
+    values["price"] = 90000
+    upsert_stone(values)
+    db.session.commit()
+    assert stone.price == 90000
+    assert stone.stock == 0
+    assert stone.status == "hidden"
+    assert Product.query.filter_by(stone_no=values["stone_no"]).count() == 1
