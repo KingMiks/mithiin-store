@@ -2,7 +2,7 @@ from datetime import datetime
 
 from helpers import format_price, to_cents, cents_to_dollars
 from models import db, Order, Product, User
-from gemstore import stone_from_api, stone_name, upsert_stone
+from gemstore import stone_from_api, stone_name, upsert_stone, hide_missing
 
 SAMPLE_STONE = {'Stone_NO': 'P86I-22', 
            'Shape': 'PEAR', 
@@ -171,3 +171,21 @@ def test_upsert_stone(client):
     assert stone.stock == 0
     assert stone.status == "hidden"
     assert Product.query.filter_by(stone_no=values["stone_no"]).count() == 1
+
+def test_hide_missing(client):
+    in_feed = Product(name="in feed", shape="round", carat=1.0, price=10050,
+                      stock=1, image="", status="active", stone_no="A1")
+    gone = Product(name="gone", shape="round", carat=1.0, price=10050,
+                   stock=1, image="", status="active", stone_no="B2")
+    manual = Product(name="manual", shape="princess", carat=1.0, price=10050,
+                     stock=1, image="", status="active")
+    db.session.add_all([in_feed, gone, manual])
+    db.session.commit()
+
+    hidden = hide_missing({"A1"})
+    db.session.commit()
+
+    assert hidden == 1
+    assert in_feed.status == "active"
+    assert gone.status == "hidden"
+    assert manual.status == "active"

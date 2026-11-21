@@ -32,3 +32,12 @@ def upsert_stone(values):
             setattr(stone, key, value)
 
     return stone
+
+def hide_missing(feed_stone_nos):
+    synced = Product.query.filter(Product.stone_no.isnot(None)).all()
+    hidden = 0
+    for product in synced:
+        if product.stone_no not in feed_stone_nos and product.status != "hidden":
+            product.status = "hidden"
+            hidden += 1
+    return hidden
