@@ -41,3 +41,36 @@ def hide_missing(feed_stone_nos):
             product.status = "hidden"
             hidden += 1
     return hidden
+
+def run_sync(feed):
+    api_status = feed.get("ApiStatus")
+    stone_list = feed.get("StoneList", [])
+
+    if api_status != "Success" or not stone_list:
+        return {"error": "bad response"}
+
+    existing = Product.query.filter(Product.stone_no.isnot(None), Product.status != "hidden").count()
+    feed_stone_nos = set()
+    upserted = 0
+    skipped = 0
+    for stone in stone_list:
+        if stone.get("Diamond_Type") != "LABGROWN" or stone.get("StockStatus") != "AVAILABLE":
+            skipped +=1
+            continue
+        values = stone_from_api(stone)
+        if values["price"] <= 0:
+            skipped +=1
+            continue
+        upsert_stone(values)
+        feed_stone_nos.add(values["stone_no"])
+        upserted +=1
+
+    if existing > 0 and len(feed_stone_nos) < existing * 0.9:
+        hidden = 0
+        hide_skipped = True
+    else:
+        hidden = hide_missing(feed_stone_nos)
+        hide_skipped = False
+    db.session.commit()
+    return {"upserted": upserted, "skipped": skipped, "hidden": hidden, "hide_skipped": hide_skipped}
+    

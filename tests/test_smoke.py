@@ -2,7 +2,7 @@ from datetime import datetime
 
 from helpers import format_price, to_cents, cents_to_dollars
 from models import db, Order, Product, User
-from gemstore import stone_from_api, stone_name, upsert_stone, hide_missing
+from gemstore import stone_from_api, stone_name, upsert_stone, hide_missing, run_sync
 
 SAMPLE_STONE = {'Stone_NO': 'P86I-22', 
            'Shape': 'PEAR', 
@@ -17,7 +17,9 @@ SAMPLE_STONE = {'Stone_NO': 'P86I-22',
            'Lab_Report_No': '804664633', 
            'Stone_Img_url': 'https://diamondurl.com/Imaged/P86I-22/still.jpg', 
            'Certificate_file_url': 'https://diamondurl.com/certificate/804664633.pdf', 
-           'Video_url': 'https://diamondurl.com/Vision360.html?d=P86I-22'
+           'Video_url': 'https://diamondurl.com/Vision360.html?d=P86I-22',
+           'Diamond_Type': "LABGROWN",
+           'StockStatus': "AVAILABLE",
     }
 
 
@@ -189,3 +191,55 @@ def test_hide_missing(client):
     assert in_feed.status == "active"
     assert gone.status == "hidden"
     assert manual.status == "active"
+
+def test_run_sync_adds_and_hides(client):
+    old_stone = Product(name="in feed", shape="round", carat=1.0, price=10050,
+                          stock=1, image="", status="active", stone_no="OLD1")
+    db.session.add(old_stone)
+    db.session.commit()
+    feed = {"ApiStatus": "Success", "StoneList": [SAMPLE_STONE]}
+    result = run_sync(feed)
+    new_stone = Product.query.filter_by(stone_no="P86I-22").first()
+
+    assert result["upserted"] == 1
+    assert new_stone.status == "pending"
+    assert old_stone.status == "hidden"
+    assert result["hidden"] == 1
+
+def test_run_sync_skips_natural_and_unavailabe(client):
+    natural = dict(SAMPLE_STONE, Stone_NO="NAT1", Diamond_Type="Natural")
+    on_hold = dict(SAMPLE_STONE, Stone_NO="HOLD1", StockStatus="HOLD")
+    feed = {"ApiStatus": "Success", "StoneList": [SAMPLE_STONE, on_hold, natural]}
+
+    result = run_sync(feed)
+
+    assert result["upserted"] == 1
+    assert result["skipped"] == 2
+    assert Product.query.filter_by(stone_no="NAT1").first() is None
+    assert Product.query.filter_by(stone_no="HOLD1").first() is None
+
+def test_run_sync_bad_response_changes_nothing(client):
+    old_stone = Product(name="in feed", shape="round", carat=1.0, price=10050,
+                              stock=1, image="", status="active", stone_no="OLD1")
+    db.session.add(old_stone)
+    db.session.commit()
+    feed = {"ApiStatus": "Error", "StoneList": [SAMPLE_STONE]}
+    result = run_sync(feed)
+
+    assert "error" in result
+    assert old_stone.status == "active"
+    assert Product.query.filter_by(stone_no="P86I-22").first() is None
+
+def test_run_sync_small_feed_hides_nothing(client):
+    for i in range(10):
+        db.session.add(Product(name=f"stone {i}", shape="round", carat=1.0, price=10050,
+        stock=1, image="", status="active", stone_no=f"S{i}"))
+    db.session.commit()
+    feed = {"ApiStatus": "Success", "StoneList": [SAMPLE_STONE]}
+
+    result = run_sync(feed)
+
+    assert result["hide_skipped"] is True
+    assert result["hidden"] == 0
+    first = Product.query.filter_by(stone_no="S0").first()
+    assert first.status == "active"
