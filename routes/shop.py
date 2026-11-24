@@ -27,7 +27,7 @@ def home():
 @shop.route("/product/<int:product_id>")
 def product_detail(product_id):
     product = get_product(product_id)
-    if product is None or product.status == "hidden":
+    if product is None or product.status in ("hidden", "pending"):
         abort(404)
     elif product.status == "coming_soon":
         return render_template("coming_soon.html", product=product)

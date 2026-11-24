@@ -243,3 +243,14 @@ def test_run_sync_small_feed_hides_nothing(client):
     assert result["hidden"] == 0
     first = Product.query.filter_by(stone_no="S0").first()
     assert first.status == "active"
+
+def test_pending_stone_not_visible(client):
+    pending_stone = Product(name="in feed", shape="round", carat=1.0, price=10050,
+                                  stock=1, image="", status="pending", stone_no="OLD1")
+    db.session.add(pending_stone)
+    db.session.commit()
+    response = client.get(f"/product/{pending_stone.id}")
+    assert response.status_code == 404
+
+    response = client.get(f"/checkout/{pending_stone.id}")
+    assert response.status_code == 404
