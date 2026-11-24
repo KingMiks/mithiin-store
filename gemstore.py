@@ -1,5 +1,8 @@
 from helpers import to_cents
 from models import Product, db
+import os
+import requests
+from dotenv import load_dotenv
 
 def stone_from_api(raw):
     return {
@@ -73,4 +76,10 @@ def run_sync(feed):
         hide_skipped = False
     db.session.commit()
     return {"upserted": upserted, "skipped": skipped, "hidden": hidden, "hide_skipped": hide_skipped}
-    
+
+def fetch_feed():
+    url = os.getenv("GEMSTORE_API_URL", "")
+    token = os.getenv("GEMSTORE_API_KEY", "")
+    r = requests.post(url, params={"APIToken": token}, timeout=120)
+    r.raise_for_status()
+    return r.json()

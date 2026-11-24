@@ -18,6 +18,8 @@ from routes.account import account
 from routes.admin import admin
 from routes.shop import shop
 from helpers import format_price, cents_to_dollars
+import requests
+from gemstore import fetch_feed, run_sync
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
@@ -49,7 +51,16 @@ def attempt_limit(error):
 def developer_error(error):
     return render_template("error.html", title="Something went wrong", message="We hit a problem on our end. Please try again in a few minutes. If you have any issues please contact us with the email below, thank you."), 500
 
-
+@app.cli.command("sync-stones")
+def sync_stones():
+    """Pull the gemstore feed and sync stones into the database."""
+    try:
+        feed = fetch_feed()
+    except requests.RequestException as e:
+        print(f"Fetch failed: {type(e).__name__}")
+        return
+    result = run_sync(feed)
+    print(result)
 
 
 if __name__ == "__main__":
