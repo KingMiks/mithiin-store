@@ -7,8 +7,9 @@ from flask import (
     url_for,
 )
 
-from models import Product, db
-
+from models import Product, db, Order
+from datetime import datetime
+import stripe
 
 def admin_required(f):
     @wraps(f)
@@ -51,3 +52,6 @@ def format_price(amount):
 def cents_to_dollars(amount):
     dollars, cents = divmod(amount, 100)
     return f"{dollars}.{cents:02d}"
+
+def build_order(product, stripe_session_id, user_id):
+    return Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=user_id, stripe_session_id=stripe_session_id, supplier_price=product.supplier_price)

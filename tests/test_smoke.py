@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from helpers import format_price, to_cents, cents_to_dollars
+from helpers import format_price, to_cents, cents_to_dollars, build_order
 from models import db, Order, Product, User
 from gemstore import stone_from_api, stone_name, upsert_stone, hide_missing, run_sync, apply_markup
 from decimal import Decimal
@@ -265,4 +265,22 @@ def test_apply_markup():
     assert case1 == 39424
     assert case2 == 1798
     assert case3 == 1502
+
+def test_build_order(client):
+    stone = Product(name="in feed", shape="round", carat=1.0, price=20000,
+                                      stock=1, image="", status="pending", stone_no="NEW1", supplier_price=10000)
+    db.session.add(stone)
+    db.session.commit()
+    order = build_order(stone, "cs_test_1", None)
+
+    assert order.price_paid == 20000
+    assert order.supplier_price == 10000
+    assert order.quantity == 1
+    assert order.stripe_session_id == "cs_test_1"
+
+    stone.supplier_price = 99999
+
+    assert order.supplier_price == 10000
+
+
 

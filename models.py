@@ -9,6 +9,7 @@ class Product(db.Model):
     shape = db.Column(db.String(200), nullable=False)
     carat = db.Column(db.Float())
     price = db.Column(db.Integer()) # in cents, the shopper price (after markup)
+    supplier_price = db.Column(db.Integer()) # in cents, holds gemstore price.
     stock = db.Column(db.Integer())
     image = db.Column(db.String(500))
     status = db.Column(db.String(200), default="coming_soon")
@@ -22,14 +23,14 @@ class Product(db.Model):
     report_no = db.Column(db.String(200))
     certificate_url = db.Column(db.String(500))
     video_url = db.Column(db.String(500))
-    supplier_price = db.Column(db.Integer()) # in cents, holds gemstore price.
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     quantity = db.Column(db.Integer())
-    price_paid = db.Column(db.Integer()) # in cents, e.g. 123450 = $1,234.50
+    price_paid = db.Column(db.Integer()) # in cents, the shopper price (after markup)
+    supplier_price = db.Column(db.Integer()) # in cents, the gemstore's price at the time of sale.
     time = db.Column(db.DateTime())
     product = db.relationship("Product")
     user = db.relationship("User")
