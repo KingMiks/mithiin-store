@@ -2,7 +2,10 @@ from helpers import to_cents
 from models import Product, db
 import os
 import requests
+from decimal import Decimal, ROUND_HALF_UP
 from dotenv import load_dotenv
+
+MARKUP = Decimal("2.0")
 
 def stone_from_api(raw):
     return {
@@ -83,3 +86,6 @@ def fetch_feed():
     r = requests.post(url, params={"APIToken": token}, timeout=120)
     r.raise_for_status()
     return r.json()
+
+def apply_markup(cents, markup=MARKUP):
+    return int((cents*markup).quantize(Decimal(1), rounding=ROUND_HALF_UP))

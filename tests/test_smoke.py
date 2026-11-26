@@ -2,7 +2,8 @@ from datetime import datetime
 
 from helpers import format_price, to_cents, cents_to_dollars
 from models import db, Order, Product, User
-from gemstore import stone_from_api, stone_name, upsert_stone, hide_missing, run_sync
+from gemstore import stone_from_api, stone_name, upsert_stone, hide_missing, run_sync, apply_markup
+from decimal import Decimal
 
 SAMPLE_STONE = {'Stone_NO': 'P86I-22', 
            'Shape': 'PEAR', 
@@ -254,3 +255,13 @@ def test_pending_stone_not_visible(client):
 
     response = client.get(f"/checkout/{pending_stone.id}")
     assert response.status_code == 404
+
+def test_apply_markup():
+    case1 = apply_markup(19712)
+    case2 = apply_markup(999, Decimal("1.8"))
+    case3 = apply_markup(1001, Decimal("1.5"))
+
+    assert case1 == 39424
+    assert case2 == 1798
+    assert case3 == 1502
+
