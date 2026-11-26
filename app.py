@@ -6,6 +6,7 @@ The gemstore API and Stripe Connect are not wired in yet.
 
 import os
 
+import requests
 import stripe
 from dotenv import load_dotenv
 from flask import Flask, render_template
@@ -13,13 +14,12 @@ from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 
 from extensions import limiter
+from gemstore import fetch_feed, run_sync
+from helpers import cents_to_dollars, format_price
 from models import db
 from routes.account import account
 from routes.admin import admin
 from routes.shop import shop
-from helpers import format_price, cents_to_dollars
-import requests
-from gemstore import fetch_feed, run_sync
 
 load_dotenv()  # reads .env locally; on a real host, env vars come from that host's dashboard instead
 app = Flask(__name__)
