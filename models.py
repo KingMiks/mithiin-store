@@ -8,7 +8,7 @@ class Product(db.Model):
     name = db.Column(db.String(200), nullable=False)
     shape = db.Column(db.String(200), nullable=False)
     carat = db.Column(db.Float())
-    price = db.Column(db.Integer()) # in cents, e.g. 123450 = $1,234.50
+    price = db.Column(db.Integer()) # in cents, the shopper price (after markup)
     stock = db.Column(db.Integer())
     image = db.Column(db.String(500))
     status = db.Column(db.String(200), default="coming_soon")
@@ -22,6 +22,7 @@ class Product(db.Model):
     report_no = db.Column(db.String(200))
     certificate_url = db.Column(db.String(500))
     video_url = db.Column(db.String(500))
+    supplier_price = db.Column(db.Integer()) # in cents, holds gemstore price.
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)

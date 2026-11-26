@@ -147,7 +147,8 @@ def test_stone_from_api():
     stone  = stone_from_api(SAMPLE_STONE)
     assert stone["stone_no"] == "P86I-22"
     assert stone["carat"] == 5.14
-    assert stone["price"] == 822400
+    assert stone["price"] == 1644800
+    assert stone["supplier_price"] == 822400
 
 def test_stone_name():
     pear = stone_name(5.14, "PEAR")

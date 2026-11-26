@@ -8,11 +8,12 @@ from dotenv import load_dotenv
 MARKUP = Decimal("2.0")
 
 def stone_from_api(raw):
+    cost = to_cents(raw["SaleAmt"])
     return {
         "stone_no": raw["Stone_NO"],
         "shape": raw["Shape"],
         "carat": float(raw["Weight"]),
-        "price": to_cents(raw["SaleAmt"]),
+        "price": apply_markup(cost),
         "cut": raw["Cut"],
         "color": raw["Color"],
         "clarity": raw["Clarity"],
@@ -23,6 +24,7 @@ def stone_from_api(raw):
         "image": raw["Stone_Img_url"],
         "certificate_url": raw["Certificate_file_url"],
         "video_url": raw["Video_url"],
+        "supplier_price": cost
     }
 
 def stone_name(carat, shape):
