@@ -14,6 +14,7 @@ def stone_from_api(raw):
         "shape": raw["Shape"],
         "carat": float(raw["Weight"]),
         "price": apply_markup(cost),
+        "supplier_price": cost,
         "cut": raw["Cut"],
         "color": raw["Color"],
         "clarity": raw["Clarity"],
@@ -24,7 +25,6 @@ def stone_from_api(raw):
         "image": raw["Stone_Img_url"],
         "certificate_url": raw["Certificate_file_url"],
         "video_url": raw["Video_url"],
-        "supplier_price": cost
     }
 
 def stone_name(carat, shape):
