@@ -1,7 +1,5 @@
-{% extends "base.html" %}
-{% block title %}Orders{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Orders{% endblock %} {% block content
+%}
 <table>
   <tr>
     <th>Order number</th>
@@ -9,6 +7,9 @@
     <th>Customer</th>
     <th>Product Name</th>
     <th>Price paid</th>
+    <th>Owed to supplier</th>
+    <th>Payment</th>
+    <th>Fulfillment</th>
     <th>Stripe session ID</th>
   </tr>
   {% for order in orders %}
@@ -21,15 +22,18 @@
     <td>Guest</td>
     {% endif %}
     <td>{{order.product.name}}</td>
-    <td>{{ order.price|price }}</td>
+    <td>{{ order.price_paid|price }}</td>
+    <td>{{ order.supplier_price|price if order.supplier_price is not none else "—" }}</td>
+    <td>{{ order.payment_status}}</td>
+    <td>{{ order.fulfillment_status}}</td>
     <td>{{order.stripe_session_id}}</td>
   </tr>
   {% else %}
   <tr>
-    <td colspan="6">No Orders yet</td>
+    <td colspan="9">No Orders yet</td>
   </tr>
   {% endfor %}
 </table>
 
- <a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
- {% endblock %}
+<a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+{% endblock %}

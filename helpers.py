@@ -54,4 +54,6 @@ def cents_to_dollars(amount):
     return f"{dollars}.{cents:02d}"
 
 def build_order(product, stripe_session_id, user_id):
-    return Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), user_id=user_id, stripe_session_id=stripe_session_id, supplier_price=product.supplier_price)
+    return Order(product_id=product.id, quantity=1, price_paid=product.price, time=datetime.now(), 
+                user_id=user_id, stripe_session_id=stripe_session_id, supplier_price=product.supplier_price, payment_status="paid",
+                fulfillment_status="unfulfilled")

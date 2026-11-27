@@ -279,6 +279,8 @@ def test_build_order(client):
     assert order.supplier_price == 10000
     assert order.quantity == 1
     assert order.stripe_session_id == "cs_test_1"
+    assert order.payment_status == "paid"
+    assert order.fulfillment_status == "unfulfilled"
 
     stone.supplier_price = 99999
 

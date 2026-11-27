@@ -35,6 +35,8 @@ class Order(db.Model):
     product = db.relationship("Product")
     user = db.relationship("User")
     stripe_session_id = db.Column(db.String(200), unique=True)
+    payment_status = db.Column(db.String(30))       # "paid", later "refunded"
+    fulfillment_status = db.Column(db.String(30))   # "unfulfilled", "confirmed", "shipped", "delivered", "cancelled"
 
 
 class User(db.Model):
