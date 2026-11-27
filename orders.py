@@ -18,7 +18,11 @@ def fulfill_checkout(stripe_session):
         return existing
 
     # 3. Read product and user from the metadata.
-    product_id = int(stripe_session.metadata.get("product_id"))
+    raw_product = stripe_session.metadata.get("product_id")
+    if not raw_product:
+        current_app.logger.warning(f"Stripe session {stripe_session.id} has no product_id in metadata; skipped.")
+        return None
+    product_id = int(raw_product)
     raw_user = stripe_session.metadata.get("user_id", "")
     user_id = int(raw_user) if raw_user else None
     

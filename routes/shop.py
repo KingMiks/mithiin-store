@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import stripe
 from flask import (
     Blueprint,
@@ -11,10 +9,10 @@ from flask import (
     session,
     url_for,
 )
-from sqlalchemy.exc import IntegrityError
 
-from helpers import get_product, get_public_inventory, build_order
-from models import Order, Product, User, db
+from helpers import get_product, get_public_inventory
+from models import User
+from orders import fulfill_checkout
 
 shop = Blueprint("shop", __name__)
 
@@ -83,27 +81,9 @@ def checkout_success():
         stripe_session = stripe.checkout.Session.retrieve(session_id)
     except stripe.error.InvalidRequestError:
         return render_template("checkout_failed.html")
-    if stripe_session.payment_status == "paid":
-        existing_order = Order.query.filter_by(stripe_session_id=stripe_session.id).first()
-        if existing_order is not None:
-            return render_template("checkout_success.html", product_name=existing_order.product.name, price_paid=existing_order.price_paid, user_id=email)
-
-        product_id = int(stripe_session.metadata.get('product_id'))
-        product = db.session.get(Product, product_id)
-        if product is None:
-            current_app.logger.warning(f"{session_id} paid for {product_id} which was deleted by an admin in real time, refund is needed.")
-            return render_template("checkout_failed.html")
-        new_order = build_order(product=product, stripe_session_id=stripe_session.id, user_id=user_id)
-        rows_updated = Product.query.filter(Product.id == product_id, Product.stock > 0).update({"stock": Product.stock - 1})
-        if rows_updated == 0:
-            db.session.rollback()
-            current_app.logger.warning(f"{session_id} paid for {product_id} when out of stock, refund is needed.")
-            return render_template("checkout_failed.html")
-        try:
-            db.session.add(new_order)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-        return render_template("checkout_success.html", product_name=product.name, price_paid=product.price, user_id=email)
-    else:
+    if stripe_session.payment_status != "paid":
+        return render_template("error.html", title="Payment Processing", message="Your payment is still being confirmed. We'll record your order as soon as it clears."), 200
+    order = fulfill_checkout(stripe_session)
+    if order is None:
         return render_template("checkout_failed.html")
+    return render_template("checkout_success.html", product_name=order.product.name, price_paid=order.price_paid, user_id=email)

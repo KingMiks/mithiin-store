@@ -323,3 +323,9 @@ def test_fulfill_checkout_sold_out_creates_nothing(client):
     assert result is None
     assert Order.query.filter_by(stripe_session_id="cs_test_1").count() == 0
     assert stone.stock == 0
+def test_fulfill_checkout_without_metadata_creates_nothing(client):
+    fake = SimpleNamespace(id="cs_test_nometa", payment_status="paid", metadata={})
+    result = fulfill_checkout(fake)
+
+    assert result is None
+    assert Order.query.filter_by(stripe_session_id="cs_test_nometa").count() == 0
