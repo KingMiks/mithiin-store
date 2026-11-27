@@ -1,7 +1,8 @@
 """
 Mithiin store - app setup.
-Configures Flask, extensions and blueprints, and registers the error pages.
-The gemstore API and Stripe Connect are not wired in yet.
+Configures Flask, extensions and blueprints (shop, accounts, admin, Stripe webhooks),
+registers the error pages, and adds the `flask sync-stones` command for the gemstore sync.
+Stripe Connect payouts to the gemstore are not wired in yet.
 """
 
 import os
