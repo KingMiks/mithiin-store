@@ -282,5 +282,9 @@ def test_build_order(client):
 
     assert order.supplier_price == 10000
 
+def test_webhook_rejects_bad_signature(client):
+    response = client.post("/stripe/webhook", data=b"{}", headers={"Stripe-Signature":"fake"})
+    assert response.status_code == 400
+
 
 
