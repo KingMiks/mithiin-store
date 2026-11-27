@@ -61,7 +61,7 @@ def checkout(product_id):
             }],
             customer_email=customer_email,
             mode="payment",
-            metadata={"product_id": product.id},
+            metadata={"product_id": product.id, "user_id": user_id if user_id else ""},
             success_url=url_for("shop.checkout_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
             cancel_url=url_for("shop.product_detail", product_id=product_id, _external=True),
         )

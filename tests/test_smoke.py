@@ -4,6 +4,8 @@ from helpers import format_price, to_cents, cents_to_dollars, build_order
 from models import db, Order, Product, User
 from gemstore import stone_from_api, stone_name, upsert_stone, hide_missing, run_sync, apply_markup
 from decimal import Decimal
+from types import SimpleNamespace
+from orders import fulfill_checkout
 
 SAMPLE_STONE = {'Stone_NO': 'P86I-22', 
            'Shape': 'PEAR', 
@@ -286,5 +288,38 @@ def test_webhook_rejects_bad_signature(client):
     response = client.post("/stripe/webhook", data=b"{}", headers={"Stripe-Signature":"fake"})
     assert response.status_code == 400
 
+def test_fulfill_checkout_twice_creates_one_order(client):
+    stone = Product(name="in feed", shape="round", carat=1.0, price=20000,
+                                          stock=1, image="", status="pending", stone_no="NEW1", supplier_price=10000)
+    db.session.add(stone)
+    db.session.commit()
+    fake = SimpleNamespace(id="cs_test_1", payment_status="paid", metadata={"product_id": str(stone.id), "user_id": ""})
+    first = fulfill_checkout(fake)
+    second = fulfill_checkout(fake)
 
+    assert first.id == second.id
+    assert stone.stock == 0
+    assert Order.query.filter_by(stripe_session_id="cs_test_1").count() == 1
 
+def test_fulfill_checkout_unpaid_creates_nothing(client):
+    stone = Product(name="in feed", shape="round", carat=1.0, price=20000,
+                                              stock=1, image="", status="pending", stone_no="NEW1", supplier_price=10000)
+    db.session.add(stone)
+    db.session.commit()
+    fake = SimpleNamespace(id="cs_test_1", payment_status="unpaid", metadata={"product_id": str(stone.id), "user_id": ""})
+    unpaid = fulfill_checkout(fake)
+
+    assert stone.stock == 1
+    assert unpaid is None
+    assert Order.query.filter_by(stripe_session_id="cs_test_1").count() == 0
+
+def test_fulfill_checkout_sold_out_creates_nothing(client):
+    stone = Product(name="in feed", shape="round", carat=1.0, price=20000,
+                                                  stock=0, image="", status="pending", stone_no="NEW1", supplier_price=10000)
+    db.session.add(stone)
+    db.session.commit()
+    fake = SimpleNamespace(id="cs_test_1", payment_status="paid", metadata={"product_id": str(stone.id), "user_id": ""})
+    result = fulfill_checkout(fake)
+    assert result is None
+    assert Order.query.filter_by(stripe_session_id="cs_test_1").count() == 0
+    assert stone.stock == 0
